@@ -1,0 +1,355 @@
+import { Callout } from "@/components/callout";
+import { ResultCard } from "@/components/result-card";
+import { StepBadge } from "@/components/step-badge";
+
+<h1 id="keploy-go-from-api-traffic-to-automated-tests">Keploy + Go: From API Traffic to Automated Tests</h1>
+
+Build your first API test suite with **Keploy, Go, and MySQL** — without manually writing a single test case.
+
+This tutorial documents my experience running the **Keploy Go + Mux + MySQL quickstart** and turning real API interactions into replayable, automated tests. If you've never heard of Keploy, by the end of this page you'll see exactly why it's magical.
+
+---
+
+<h2 id="what-youll-build">What you'll build</h2>
+
+By the end of this tutorial, you will have:
+
+- A Go URL-shortener application running locally
+- MySQL running in Docker
+- Keploy recording real API traffic as test cases
+- Auto-captured MySQL dependency mocks (no database needed at replay time)
+- A fully replayable API test suite — with **zero manually written tests**
+
+The overall workflow looks like this:
+
+```text
+Your Go App  ──►  Keploy Agent
+                      │
+          ┌───────────┴───────────┐
+          ▼                       ▼
+  API Test Cases (.yaml)   MySQL Mocks (.yaml)
+          │                       │
+          └───────────┬───────────┘
+                      ▼
+              keploy test  ──►  All tests pass ✓
+```
+
+---
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+Before you start, make sure the following are installed on your machine:
+
+| Tool | Version | Why you need it |
+|------|---------|-----------------|
+| **Go** | 1.21 + | Compile and run the sample application |
+| **Docker Desktop** | Latest | Run MySQL in a container |
+| **Git** | Any | Clone the sample repository |
+| **Keploy CLI** | Latest | Record and replay API tests |
+| **curl / Postman** | Any | Send HTTP requests to the app |
+
+<Callout type="tip" title="Windows users">
+  Run everything inside **WSL2** (Ubuntu 22.04 recommended). Keploy uses eBPF to intercept network calls, which requires a Linux kernel. Native Windows is not supported for the record/replay agent.
+</Callout>
+
+### Install Keploy CLI
+
+```bash
+curl --silent --location "https://github.com/keploy/keploy/releases/latest/download/keploy_linux_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/keploy /usr/local/bin && keploy --version
+```
+
+You should see output like: `keploy v2.x.x`
+
+---
+
+<h2 id="1-get-the-go-sample-app"><StepBadge n={1} /> Get the Go sample app</h2>
+
+Keploy maintains a collection of Go quickstart apps. We'll use the **mux-mysql** URL shortener:
+
+```bash
+git clone https://github.com/keploy/samples-go.git
+cd samples-go/mux-mysql
+```
+
+Take a quick look at what's inside:
+
+```bash
+ls -la
+```
+
+```text
+main.go          # Entry point — Mux router + MySQL connection
+handler.go       # HTTP handlers: CreateURL, GetURL
+go.mod           # Module: github.com/keploy/mux-mysql
+docker-compose.yml
+```
+
+<Callout type="info" title="What does this app do?">
+  It's a simple URL shortener. POST a long URL → get back a short code. GET the short code → redirected to the original URL. Simple, but perfect for showing how Keploy captures both the HTTP layer and the database layer.
+</Callout>
+
+---
+
+<h2 id="2-start-mysql-with-docker"><StepBadge n={2} /> Start MySQL with Docker</h2>
+
+The app needs a MySQL database. One command gets it running:
+
+```bash
+docker-compose up -d mysql
+```
+
+Verify it's healthy:
+
+```bash
+docker ps --filter "name=mysql"
+```
+
+```text
+CONTAINER ID   IMAGE         STATUS          PORTS
+a3f2b91c8d01   mysql:8.0     Up 12 seconds   0.0.0.0:3306->3306/tcp
+```
+
+<Callout type="tip" title="💡 Heads up — Port 3306">
+  This callout is just a **proactive tip** for readers — not an error on your machine. If port **3306** is already in use by another MySQL instance, edit `docker-compose.yml` and change the host port to `"3307:3306"`, then update `DB_DSN` in the next step. If you have no other MySQL running, ignore this and move on!
+</Callout>
+
+---
+
+<h2 id="3-set-the-database-connection"><StepBadge n={3} /> Set the database connection</h2>
+
+Export the DSN so the Go app knows where to find MySQL:
+
+```bash
+export DB_DSN="root:password@tcp(localhost:3306)/urlshortener?parseTime=true"
+```
+
+The `docker-compose.yml` already seeds the database schema on first boot, so no manual migrations needed.
+
+---
+
+<h2 id="4-build-the-go-app"><StepBadge n={4} /> Build the Go app</h2>
+
+```bash
+go mod download
+go build -o url-shortener .
+```
+
+<Callout type="info">
+  The binary is named `url-shortener`. Keploy wraps this binary — it doesn't modify your source code at all.
+</Callout>
+
+Test that the binary was created:
+
+```bash
+ls -lh ./url-shortener
+```
+
+```text
+-rwxr-xr-x 1 user user 8.4M Oct 02 url-shortener
+```
+
+---
+
+<h2 id="5-record-api-traffic-with-keploy"><StepBadge n={5} /> Record API traffic with Keploy</h2>
+
+This is the **magic step**. Keploy wraps your binary and intercepts all network I/O:
+
+```bash
+sudo -E keploy record -c "./url-shortener"
+```
+
+You'll see output like:
+
+```text
+ 🐰 Keploy: Starting in record mode
+ 🔌 Listening on :8080
+ 📡 eBPF hooks installed — intercepting outbound calls
+```
+
+<Callout type="tip" title="What's happening under the hood?">
+  Keploy uses **eBPF kernel hooks** to sit transparently between your app and the network. Every outgoing MySQL query and its response is captured. Every incoming HTTP request and the app's response is captured. Both get serialized into YAML files in `./keploy/`.
+</Callout>
+
+<Callout type="warning" title="Keep this terminal open">
+  Don't stop Keploy yet — it needs to be running while you send requests in the next step.
+</Callout>
+
+<Callout type="tip" title="Common issues with keploy record">
+
+  **Port 8080 already in use?**
+  Another process is on `:8080`. Run `lsof -i :8080` to find and kill it, or change the app's port in `main.go`.
+
+  **`sudo: keploy: command not found`?**
+  Use `sudo -E env "PATH=$PATH" keploy record -c "./url-shortener"` — this preserves your PATH for sudo.
+
+  **No output / app crashes immediately?**
+  MySQL may not be fully ready. Wait 10 seconds after `docker-compose up` before running keploy record.
+
+</Callout>
+
+---
+
+<h2 id="6-send-real-api-requests"><StepBadge n={6} /> Send real API requests</h2>
+
+Open a **new terminal** and fire some requests:
+
+### Create a short URL
+
+```bash
+curl -s -X POST http://localhost:8080/url \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://keploy.io/docs/go/quickstart/"}' | jq
+```
+
+```json
+{
+  "id": "abc123",
+  "short_url": "http://localhost:8080/abc123",
+  "original_url": "https://keploy.io/docs/go/quickstart/"
+}
+```
+
+### Create a second short URL
+
+```bash
+curl -s -X POST http://localhost:8080/url \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://github.com/keploy/keploy"}' | jq
+```
+
+### Retrieve a URL by short code
+
+```bash
+curl -sv http://localhost:8080/abc123 2>&1 | grep -E "Location:|< HTTP"
+```
+
+```text
+< HTTP/1.1 302 Found
+< Location: https://keploy.io/docs/go/quickstart/
+```
+
+<Callout type="success" title="Tests are being recorded!">
+  Every request you just sent has been captured as a test case. Stop the Keploy process now with **Ctrl+C**.
+</Callout>
+
+---
+
+<h2 id="7-inspect-the-generated-tests-and-mocks"><StepBadge n={7} /> Inspect the generated tests and mocks</h2>
+
+Let's see what Keploy created:
+
+```bash
+find ./keploy -type f | sort
+```
+
+```text
+./keploy/test-set-1/tests/test-1.yaml
+./keploy/test-set-1/tests/test-2.yaml
+./keploy/test-set-1/tests/test-3.yaml
+./keploy/test-set-1/mocks/mock-1.yaml
+./keploy/test-set-1/mocks/mock-2.yaml
+./keploy/test-set-1/mocks/mock-3.yaml
+```
+
+Open `test-1.yaml` and you'll see:
+
+```yaml
+version: api.keploy.io/v1beta1
+kind: Http
+name: test-1
+spec:
+  req:
+    method: POST
+    path: /url
+    body: '{"url":"https://keploy.io/docs/go/quickstart/"}'
+  resp:
+    status_code: 200
+    body: '{"id":"abc123","short_url":"http://localhost:8080/abc123"}'
+  mocks:
+    - mock-1
+```
+
+<Callout type="info" title="What's in the mock file?">
+  `mock-1.yaml` contains the exact MySQL INSERT query that was executed, along with its response. During test replay, Keploy intercepts the outbound MySQL call and returns this stored response — **no live database needed**.
+</Callout>
+
+---
+
+<h2 id="8-replay-the-tests"><StepBadge n={8} /> Replay the tests</h2>
+
+Stop Docker MySQL first (to prove the mocks work without a real database):
+
+```bash
+docker-compose stop mysql
+```
+
+Now replay all recorded tests:
+
+```bash
+sudo -E keploy test -c "./url-shortener" --delay 5
+```
+
+Watch the output:
+
+```text
+ 🐰 Keploy: Starting in test mode
+ 📂 Loaded 3 tests from test-set-1
+ 🔁 Replaying test-1 ...  ✅  PASSED  (12ms)
+ 🔁 Replaying test-2 ...  ✅  PASSED  (9ms)
+ 🔁 Replaying test-3 ...  ✅  PASSED  (8ms)
+
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Tests run: 3   Passed: 3   Failed: 0
+ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+<Callout type="success" title="All tests passed — without a database!">
+  Keploy replayed all 3 HTTP requests against your app. When the app tried to hit MySQL, Keploy intercepted the call and returned the stored mock response. The app had no idea it wasn't talking to a real database.
+</Callout>
+
+---
+
+<h2 id="9-troubleshooting"><StepBadge n={9} /> Troubleshooting</h2>
+
+Common issues and how to fix them:
+
+| Problem | Likely cause | Fix |
+|---------|-------------|-----|
+| `keploy: command not found` | Binary not in PATH | Move binary to `/usr/local/bin` |
+| `permission denied` running keploy | eBPF needs root | Use `sudo -E keploy ...` |
+| App crashes on start | MySQL not ready | Wait 10s after `docker-compose up` |
+| Tests fail on replay | Timestamps in responses | Use `--ignore-fields "timestamp"` flag |
+| `DB connection refused` | Wrong DSN or port | Check `DB_DSN` env var and Docker port mapping |
+| Zero tests generated | Requests not reaching app | Confirm app is on `:8080` before sending curl |
+
+<Callout type="tip" title="Debug mode">
+  Run `sudo -E keploy record -c "./url-shortener" --debug` to see every intercepted packet in the terminal. Extremely useful for understanding what Keploy is capturing.
+</Callout>
+
+---
+
+<h2 id="10-final-result"><StepBadge n={10} /> Final result</h2>
+
+<ResultCard />
+
+### What you learned
+
+In this tutorial, you:
+
+1. **Cloned** a real Go application (Mux router + MySQL)
+2. **Started** a database in Docker
+3. **Recorded** real API traffic with Keploy — no test code written
+4. **Inspected** auto-generated test YAML and mock YAML files
+5. **Replayed** tests successfully without a live database
+6. **Understood** how eBPF-based network interception makes Keploy language-agnostic
+
+### Why this matters
+
+Traditional API testing requires you to write test setup/teardown code, mock your database manually, and maintain hundreds of test files by hand. With Keploy, your **real production traffic becomes your test suite**. Record once, replay anywhere.
+
+<Callout type="tip" title="Next steps">
+  - Explore other quickstarts in the [Keploy samples-go repo](https://github.com/keploy/samples-go) (gin-mongo, echo-sql, grpc)
+  - Add Keploy to your CI pipeline with the [GitHub Actions integration](https://keploy.io/docs/ci-cd/github-actions/)
+  - Try the `--coverage` flag to generate code coverage reports from your recorded tests
+</Callout>
