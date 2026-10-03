@@ -1,158 +1,333 @@
-# Keploy + Go: From API Traffic to Automated Tests
+# Keploy Go Quickstart Documentation
 
-> A beginner-friendly, interactive documentation tutorial built with **Next.js 15** and **MDX** — submitted as part of the Keploy DevRel Candidate Assignment.
+A beginner-friendly, single-page documentation website built as part of the **Keploy DevRel Candidate Assignment**.
 
-🔗 **Live Demo:** [keploy-go-docs.vercel.app](https://keploy-go-docs.vercel.app) &nbsp;|&nbsp; 📖 **Tutorial:** [View on site](https://keploy-go-docs.vercel.app)
+The project explains how a developer can get started with Keploy and a Go application, record API interactions, and run the generated tests. The documentation is presented as a clean, documentation-style website using **Next.js and MDX**.
+
+## 🚀 Live Demo
+
+**Vercel:** `ADD_YOUR_VERCEL_URL_HERE`
+
+## 📦 Repository
+
+**GitHub:** `ADD_YOUR_GITHUB_REPOSITORY_URL_HERE`
 
 ---
 
-## 📌 What this is
+## 🎯 Assignment Objective
 
-This is a single-page documentation website that teaches developers how to:
-1. Run a Go + MySQL URL shortener app
-2. Record real API traffic using **Keploy**
-3. Replay those recordings as **automated tests — without writing a single line of test code**
+The goal of this project is to:
 
-The tutorial covers 10 steps end-to-end, from cloning the repo to seeing 3 passing tests.
+- Learn and run a Keploy Go quickstart.
+- Document the experience in a beginner-friendly tutorial.
+- Explain the purpose behind each step rather than simply copying existing documentation.
+- Build the tutorial as a static website using **Next.js + MDX**.
+- Provide a clean and professional developer documentation experience.
+- Deploy the finished website to Vercel.
 
 ---
 
 ## ✨ Features
 
-| Feature | Description |
-|---|---|
-| 🌗 Dark / Light mode | Toggle between themes |
-| 🔐 Sign In system | Demo auth with per-user progress tracking |
-| 🧪 Interactive Test Runner | Click "Run Tests" to watch tests animate live |
-| 📊 Step progress tracker | Mark steps done, progress saved per user |
-| 🔒 Guest gate | Signed-out users see step names + fade preview |
-| 📖 Scroll-spy sidebar | Active step highlights as you scroll |
-| 📋 Copy buttons | One-click copy on every code block |
-| ⏱ Reading time | Hero meta bar shows estimated read time |
-| 📱 Mobile responsive | Works on all screen sizes |
-| 🦶 Icon footer | Links to GitHub, Docs, Discord, CI/CD |
+- **Next.js** based documentation website
+- **MDX** content so Markdown can be combined with React components
+- Step-by-step Go + Keploy tutorial
+- Syntax-highlighted code blocks
+- Documentation-style sidebar navigation
+- Active step highlighting and same-page navigation
+- Custom callout/info components
+- Result cards and step badges
+- Interactive test-runner component
+- Light/dark theme support
+- Responsive layout for different screen sizes
+- Beginner-friendly explanations and troubleshooting guidance
 
 ---
 
-## 🔑 Demo Credentials
-
-To access the full tutorial on the live site:
-
-| Field | Value |
-|---|---|
-| Email | `demo@keploy.io` |
-| Password | `Keploy@123` |
-
-> Password requirements: 8+ chars · 1 uppercase · 1 lowercase · 1 number · 1 special character
-
----
-
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
 | Technology | Purpose |
 |---|---|
-| [Next.js 15](https://nextjs.org) | React framework (App Router) |
-| [MDX](https://mdxjs.com) | Markdown + JSX content |
-| [Tailwind CSS v4](https://tailwindcss.com) | Styling utility |
-| [rehype-highlight](https://github.com/rehypejs/rehype-highlight) | Syntax highlighting |
-| [remark-gfm](https://github.com/remarkjs/remark-gfm) | GitHub Flavored Markdown (tables) |
-| [next-themes](https://github.com/pacocoursey/next-themes) | Dark/light mode |
-| [lucide-react](https://lucide.dev) | Icons |
+| Next.js | Web framework |
+| React | UI components |
+| MDX | Documentation content |
+| Tailwind CSS | Styling |
+| Lucide React | Icons |
+| Remark GFM | GitHub-Flavored Markdown support |
+| Rehype Highlight | Code syntax highlighting |
+| TypeScript | Type-safe development |
+| Vercel | Deployment |
 
 ---
 
 ## 📁 Project Structure
 
-```
+```text
 keploy-go-docs/
+│
 ├── app/
-│   ├── page.mdx              # Main tutorial content (10 steps)
-│   ├── layout.tsx            # Root layout with providers
-│   ├── globals.css           # Design system + all styles
-│   └── login/
-│       ├── page.tsx          # Sign-in page
-│       └── layout.tsx        # Login page layout
+│   ├── page.mdx                 # Main documentation/tutorial page
+│   └── ...
+│
 ├── components/
-│   ├── docs-shell.tsx        # Sidebar, header, scroll-spy, progress
-│   ├── auth-provider.tsx     # Auth context (demo credentials)
-│   ├── guest-gate.tsx        # Content gate for signed-out users
-│   ├── interactive-test-runner.tsx  # Animated test runner widget
-│   ├── code-block.tsx        # Dark code shell with copy button
-│   ├── callout.tsx           # Info/Tip/Warning/Success boxes
-│   ├── footer.tsx            # Icon footer with links
-│   ├── result-card.tsx       # Test result summary card
-│   ├── step-badge.tsx        # Numbered step badge
-│   ├── theme-toggle.tsx      # Dark/light toggle button
-│   └── theme-provider.tsx    # next-themes wrapper
-├── mdx-components.tsx        # MDX component registry
-└── next.config.ts            # MDX + remark/rehype config
+│   ├── callout.tsx              # Information/warning callouts
+│   ├── result-card.tsx          # Result/status cards
+│   ├── step-badge.tsx           # Step indicators
+│   ├── interactive-test-runner.tsx
+│   ├── auth-gate.tsx
+│   ├── guest-gate.tsx
+│   └── ...
+│
+├── public/                      # Static assets
+│
+├── next.config.ts               # Next.js + MDX configuration
+├── package.json                 # Dependencies and scripts
+├── tsconfig.json                # TypeScript configuration
+├── postcss.config.mjs           # Tailwind/PostCSS configuration
+├── eslint.config.mjs            # ESLint configuration
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## 🚀 Run Locally
+## ⚙️ Prerequisites
+
+Before running the documentation website locally, make sure you have:
+
+- Node.js installed
+- npm installed
+- Git installed
+
+For the tutorial itself, follow the prerequisites mentioned inside the documentation page for the Go/Keploy quickstart.
+
+---
+
+## 🚀 Run the Project Locally
+
+### 1. Clone the repository
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/YOUR_USERNAME/keploy-go-docs.git
+git clone YOUR_GITHUB_REPOSITORY_URL
 cd keploy-go-docs
-
-# 2. Install dependencies
-npm install
-
-# 3. Start dev server
-npm run dev
-
-# 4. Open in browser
-# http://localhost:3000
 ```
 
-### Build for production
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Start the development server
+
+```bash
+npm run dev
+```
+
+The development server will normally be available at:
+
+```text
+http://localhost:3000
+```
+
+### 4. Build for production
 
 ```bash
 npm run build
+```
+
+### 5. Start the production server
+
+```bash
 npm start
+```
+
+### 6. Run linting
+
+```bash
+npm run lint
 ```
 
 ---
 
-## 🎯 Assignment Requirements Checklist
+## 📝 Documentation Content
 
-| Requirement | Status |
-|---|---|
-| Next.js framework | ✅ |
-| MDX content (`.mdx`) | ✅ |
-| Step-by-step tutorial | ✅ 10 steps |
-| Code snippets with syntax highlighting | ✅ |
-| Interactive UI elements (callout boxes) | ✅ |
-| **Bonus:** High-quality polished UI | ✅ |
-| **Bonus:** Dark / Light mode toggle | ✅ |
-| **Bonus:** Thoughtful UI library usage | ✅ |
-| Deployed on Vercel | ✅ |
+The main tutorial is written in MDX.
 
----
+The tutorial follows a beginner-friendly flow:
 
-## 📸 Screenshots
+1. Introduction to the tutorial
+2. Prerequisites
+3. Setting up the Go application
+4. Setting up Keploy
+5. Running the application
+6. Recording API test cases
+7. Running Keploy tests
+8. Understanding the generated tests
+9. Troubleshooting common issues
+10. Summary
 
-### Home page (Dark mode)
-> Scroll-spy sidebar · Reading progress bar · Step tracker
-
-### Sign In page
-> Demo credentials · Password strength requirements · Autofill button
-
-### Interactive Test Runner
-> Click "▶ Run Tests" → watch 3 tests animate with live timing
+The tutorial focuses not only on **what command to run**, but also on **why the step is necessary** and what Keploy is doing behind the scenes.
 
 ---
 
-## 👩‍💻 Author
+## 🧩 MDX Components
 
-Built by **Parul Gupta** as part of the [Keploy DevRel Candidate Assignment](https://keploy.io).
+The project uses custom React components directly inside MDX.
 
-- GitHub: [@YOUR_GITHUB_USERNAME](https://github.com/YOUR_GITHUB_USERNAME)
+Examples include:
+
+### Callouts
+
+Used to highlight important information, tips, warnings, or notes.
+
+```mdx
+<Callout type="info">
+  This step explains why the command is required.
+</Callout>
+```
+
+### Step badges
+
+Used to make the tutorial steps visually easier to follow.
+
+```mdx
+<StepBadge>01</StepBadge>
+```
+
+### Result cards
+
+Used to show expected results or important outcomes.
+
+```mdx
+<ResultCard />
+```
+
+### Interactive test runner
+
+Used to provide a more interactive developer experience around the testing workflow.
+
+---
+
+## 🎨 UI / UX Approach
+
+The website is designed to feel like modern developer documentation rather than a traditional marketing website.
+
+The interface includes:
+
+- A persistent step-based sidebar
+- Highlighting of the current section
+- Same-page navigation
+- Clear section hierarchy
+- Readable typography
+- Code blocks with syntax highlighting
+- Contextual callouts
+- Responsive behavior
+- Theme switching
+
+The navigation is designed so that clicking a step takes the reader directly to the corresponding section on the page.
+
+---
+
+## 🔄 Keploy Workflow Covered
+
+The tutorial introduces the basic workflow of using Keploy with a Go application:
+
+```text
+Go Application
+      │
+      ▼
+Run the application
+      │
+      ▼
+Send API requests
+      │
+      ▼
+Keploy records interactions
+      │
+      ▼
+Generated test cases
+      │
+      ▼
+Run Keploy tests
+      │
+      ▼
+Verify application behaviour
+```
+
+The purpose is to make the testing workflow understandable to a developer who has never used Keploy before.
+
+---
+
+## 🌐 Deployment
+
+The application can be deployed using Vercel.
+
+Typical deployment flow:
+
+```text
+GitHub Repository
+       │
+       ▼
+Connect repository to Vercel
+       │
+       ▼
+Vercel builds Next.js application
+       │
+       ▼
+Live documentation website
+```
+
+The project uses Next.js and is therefore suitable for deployment through Vercel.
+
+---
+
+## 🧪 Quality Checks
+
+Before submitting the project, verify:
+
+- [ ] The website starts successfully with `npm run dev`
+- [ ] The production build succeeds with `npm run build`
+- [ ] MDX content renders correctly
+- [ ] All sidebar links navigate to the correct sections
+- [ ] Code blocks are readable and syntax highlighted
+- [ ] Dark/light mode works correctly
+- [ ] The layout works on smaller screens
+- [ ] There are no broken links
+- [ ] There are no obvious spelling or formatting errors
+- [ ] The GitHub repository is public
+- [ ] The Vercel deployment is accessible
+
+---
+
+## 📌 Assignment Deliverables
+
+The final submission requires two links:
+
+1. **Public GitHub repository** containing the source code.
+2. **Live Vercel deployment** containing the completed documentation page.
+
+Replace the placeholders at the top of this README with the final links before submission.
+
+---
+
+## 👩‍💻 Built For
+
+**Keploy DevRel Candidate Assignment**
+
+This project demonstrates:
+
+- Technical learning
+- Developer-focused documentation
+- Next.js development
+- MDX usage
+- React component integration
+- UI/UX thinking
+- API testing concepts
+- Technical communication
 
 ---
 
 ## 📄 License
 
-MIT — free to use and learn from.
+This project was created for the Keploy DevRel candidate assignment.
