@@ -10,7 +10,7 @@ The project explains how a developer can get started with Keploy and a Go applic
 
 ## 📦 Repository
 
-**GitHub:** `ADD_YOUR_GITHUB_REPOSITORY_URL_HERE`
+**GitHub:** https://github.com/PARULGUPTABML/Keploy-go-docs
 
 ---
 
