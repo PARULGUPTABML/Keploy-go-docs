@@ -1,8 +1,12 @@
 import { Callout } from "@/components/callout";
 import { ResultCard } from "@/components/result-card";
 import { StepBadge } from "@/components/step-badge";
+import { InteractiveTestRunner } from "@/components/interactive-test-runner";
+import { AuthGate } from "@/components/auth-gate";
 
 <h1 id="keploy-go-from-api-traffic-to-automated-tests">Keploy + Go: From API Traffic to Automated Tests</h1>
+
+<div className="hero-meta">⏱ ~8 min read &nbsp;·&nbsp; 10 steps &nbsp;·&nbsp; Beginner friendly</div>
 
 Build your first API test suite with **Keploy, Go, and MySQL** — without manually writing a single test case.
 
@@ -62,6 +66,8 @@ sudo mv /tmp/keploy /usr/local/bin && keploy --version
 You should see output like: `keploy v2.x.x`
 
 ---
+
+<GuestGate>
 
 <h2 id="1-get-the-go-sample-app"><StepBadge n={1} /> Get the Go sample app</h2>
 
@@ -333,6 +339,8 @@ Common issues and how to fix them:
 
 <ResultCard />
 
+<InteractiveTestRunner />
+
 ### What you learned
 
 In this tutorial, you:
@@ -353,3 +361,5 @@ Traditional API testing requires you to write test setup/teardown code, mock you
   - Add Keploy to your CI pipeline with the [GitHub Actions integration](https://keploy.io/docs/ci-cd/github-actions/)
   - Try the `--coverage` flag to generate code coverage reports from your recorded tests
 </Callout>
+
+</GuestGate>
