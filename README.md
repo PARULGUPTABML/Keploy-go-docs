@@ -6,7 +6,7 @@ The project explains how a developer can get started with Keploy and a Go applic
 
 ## 🚀 Live Demo
 
-**Vercel:** `ADD_YOUR_VERCEL_URL_HERE`
+**Vercel:** https://keploy-go-docs-gray.vercel.app/
 
 ## 📦 Repository
 
